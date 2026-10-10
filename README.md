@@ -1,175 +1,107 @@
 # AgentStory
 
-AgentShare is a local-first manager and reader for AI coding-agent sessions.
-Desktop discovers Codex and Claude Code history without modifying the original
-JSONL files. Sharing is explicit: a reviewed, sanitized immutable snapshot is
-uploaded to the versioned Go API and read at `/t/:slug`.
+> 本地优先的 AI 编程会话管理工具，让 Codex 与 Claude Code 的历史记录真正成为可检索、可整理、可复用的个人知识库。
 
-## Downloads
+[下载最新版本](https://github.com/jewdore/agentstory/releases/latest) · [English](#english)
 
-Download the latest desktop release from the [AgentStory Releases page](https://github.com/jewdore/agentstory/releases/latest).
+## AgentStory 是什么？
 
-## Architecture
+使用 AI 编程工具时，大量有价值的排查过程、技术决策和解决方案会散落在不同会话中。AgentStory 自动发现本机的 Codex 与 Claude Code 历史记录，将它们整理到统一的桌面应用中，方便你随时搜索、阅读和沉淀知识。
 
-```text
-Codex JSONL ??
-             ?? TypeScript adapter ? Unified AgentSession ??
-Claude JSONL ?                                             ?? Desktop SQLite
-                                                           ?? Go API / PostgreSQL
-                                                                ?? Next.js Web
-                                                                ?? future iOS / Android
-```
+AgentStory 采用本地优先设计。浏览、搜索、标记和笔记默认都在你的设备上完成，不会自动上传会话内容。
 
-- `packages/session-core`: versioned model, Codex/Claude adapters, normalization, secret scanner.
-- `packages/api-client`: one API client shared by Desktop, Web, and future native clients.
-- `packages/ui`: dark reader, virtualized transcript, code/diff/tool rendering.
-- `apps/desktop`: Tauri 2 + React + Rust scanner + SQLite index + tray.
-- `apps/web`: Next.js public reader, login, cloud library, and same-origin API proxy.
-- `server`: Go API, PostgreSQL migrations, ownership checks, immutable snapshots, email OTP auth.
+## 主要功能
 
-## Local development
+- **自动发现会话**：读取本机 Codex 和 Claude Code 的历史记录，无需手动导入。
+- **统一阅读体验**：集中查看提问、回答、思考过程、工具调用和代码变更。
+- **快速检索整理**：按关键词、项目、Agent、时间和标签查找历史会话。
+- **笔记与标签**：摘录重要内容，添加备注和标签，逐步建立个人知识库。
+- **本地 MCP 接口**：让支持 MCP 的工具按需检索你保存的 Notes。
+- **安全分享**：由你主动选择内容，在检查敏感信息后创建只读分享快照。
 
-Prerequisites: Node 23+, pnpm 10+, Go 1.23+, Rust 1.97+, and PostgreSQL 17+
-(or Docker Desktop).
+## 下载与安装
 
-```powershell
-pnpm install
-Copy-Item .env.example .env
+前往 [Releases](https://github.com/jewdore/agentstory/releases/latest) 下载最新版本。
 
-# Start PostgreSQL and the API (Docker)
-docker compose up --build postgres api
+| 系统 | 推荐文件 | 说明 |
+| --- | --- | --- |
+| Windows 10/11 x64 | `AgentStory_*_x64-setup.exe` | 推荐使用的安装程序 |
+| Windows 10/11 x64 | `AgentStory_*_x64_en-US.msi` | 适合需要 MSI 的用户或批量安装 |
+| macOS（Apple Silicon / Intel） | `AgentStory_*_universal.dmg` | 通用安装镜像 |
+| macOS（Apple Silicon / Intel） | `AgentStory_universal.app.tar.gz` | 压缩版应用程序 |
 
-# In separate terminals
-pnpm dev:web
-pnpm --filter @agentshare/desktop dev
-```
+安装包目前可能尚未进行商业代码签名。如果 Windows SmartScreen 或 macOS Gatekeeper 显示安全提示，请确认文件来自本仓库的 Releases 页面后再决定是否继续。
 
-Open `http://127.0.0.1:3000` for Web and use the Tauri command below for the
-native Desktop shell:
+## 开始使用
 
-```powershell
-pnpm --filter @agentshare/desktop tauri dev
-```
+1. 下载并安装适合你系统的版本。
+2. 启动 AgentStory，应用会自动扫描本机支持的 Agent 历史记录。
+3. 通过项目、标签、收藏和搜索整理会话。
+4. 在重要内容上创建 Notes，沉淀可复用的经验。
 
-## Deploy to `dev`
+## 隐私说明
 
-`deploy.sh` deploys Web + Go API + PostgreSQL through the `dev` SSH alias in
-`~/.ssh/config`. Desktop remains a local application; it is not installed on the
-server. No local agent history is scanned or uploaded by this script.
+- 原始 Codex 与 Claude Code 历史文件仅以只读方式访问。
+- 本地索引、标签和笔记保存在你的设备上。
+- AgentStory 不会自动上传你的会话。
+- 只有你主动发起分享时，所选内容才会经过敏感信息检查并创建分享快照。
 
-Prerequisites: Bash, SSH/SCP, tar, pnpm and Go locally; Docker Compose v2 with
-`up --wait`, Bash, Python 3, `flock`, and registry access remotely. SSH host keys
-must already be trusted. On Windows use **Git Bash**, not the Windows WSL Bash
-launcher, so the script reuses your Windows SSH configuration and keys.
+## 反馈
 
-### Private development machine
+如果遇到问题或有功能建议，请在本仓库提交 [Issue](https://github.com/jewdore/agentstory/issues)。提交问题时，请尽量附上操作系统、AgentStory 版本和复现步骤，但不要上传包含密钥、账号或私人会话的日志。
 
-The first command creates random credentials on the server, enables development
-sign-in explicitly, and binds Web/API **only to server loopback**:
+---
 
-```bash
-bash deploy.sh --init-dev --allow-dev-auth
-# Subsequent deployments reuse credentials and the persistent database:
-bash deploy.sh --allow-dev-auth
-```
+<a id="english"></a>
 
-Web uses port 3080 and API uses 8088 for this profile, avoiding the existing
-3000/5432 services on `dev`. PostgreSQL has no published host port. Access through
-an SSH tunnel (leave this command running):
+## English
 
-```bash
-ssh -N -L 3080:127.0.0.1:3080 -L 8088:127.0.0.1:8088 dev
-```
+AgentStory is a local-first desktop app that turns your Codex and Claude Code history into a searchable, organized, and reusable personal knowledge base.
 
-Open `http://localhost:3080`; the development sign-in screen displays the test
-verification code. Desktop can use `http://localhost:8088`. These are development
-URLs, **not public share links**. Never expose this development-auth profile to
-the network. `--init-dev` does not overwrite an existing shared environment.
+[Download the latest release](https://github.com/jewdore/agentstory/releases/latest)
 
-### Production
+### What is AgentStory?
 
-```bash
-cp .env.production.example .env.production
-# Edit credentials, HTTPS origin, SMTP, ports, and ALLOWED_ORIGINS.
-# Generate independent URL-safe secrets, for example: openssl rand -hex 32
-bash deploy.sh --env-file .env.production
-# Subsequent deployments preserve /opt/agentshare/shared/.env:
-bash deploy.sh
-```
+Valuable debugging trails, technical decisions, and solutions are often buried across AI coding sessions. AgentStory automatically discovers supported session history on your computer and brings it into one desktop app for reading, searching, and knowledge capture.
 
-Production refuses placeholder credentials, development authentication, missing
-SMTP configuration, and non-HTTPS origins. Configure your existing HTTPS reverse
-proxy to forward Web traffic to the configured loopback Web port; domain/DNS,
-TLS certificates and SMTP credentials are not provisioned by this script.
-`POSTGRES_PASSWORD` must contain at least 24 URL-safe characters (`A-Z a-z 0-9 _ -`)
-and `AUTH_PEPPER` at least 32 random characters. Use ports not already occupied.
-Set `ALLOWED_ORIGINS` to include the real Web origin and any required Desktop
-origins. Changing the database password requires a separate database operation;
-changing only the environment file is deliberately rejected.
+AgentStory is local-first. Browsing, searching, tagging, and note-taking happen on your device by default. Your sessions are never uploaded automatically.
 
-### Checks, releases, and recovery
+### Highlights
 
-```bash
-bash deploy.sh --dry-run --skip-checks  # package only, no SSH
-bash deploy.sh --host dev --root /opt/agentshare --keep-releases 5
-bash deploy.sh --skip-checks --allow-dev-auth  # only after running checks yourself
-python -m unittest discover -s scripts -p 'test_*.py'
-bash scripts/test-deploy.sh
-```
+- **Automatic discovery** of local Codex and Claude Code sessions.
+- **Unified session reader** for prompts, responses, reasoning, tool calls, and code changes.
+- **Fast search and organization** by keyword, project, agent, date, and tag.
+- **Notes and tags** for capturing reusable knowledge from long conversations.
+- **Local MCP access** so compatible tools can search your saved Notes when requested.
+- **Controlled sharing** with a review and sensitive-information check before publishing a read-only snapshot.
 
-By default the script runs lint, typecheck, core tests, Go tests, and frontend
-builds. Archives exclude dependencies, builds, dotenv files, databases and common
-key files; nevertheless, keep arbitrary secrets out of source code.
+### Download and install
 
-- `/opt/agentshare/releases/<timestamp-suffix>` holds each source release and
-  its private environment snapshot (mode 600).
-- `/opt/agentshare/current` changes only after all containers pass health checks.
-- A deployment lock prevents concurrent activation. Web/API image tags are
-  unique per release, allowing rollback without rebuilding older source.
-- Failed builds leave running services untouched. Failed startup attempts restore
-  the previous containers, or remove the first-attempt containers without deleting
-  the database volume. First-use database credentials are retained for retries.
-- The five newest successful source releases are retained; failed releases remain
-  for diagnosis. No global Docker prune is run, and image cleanup is manual.
-- Container rollback does **not** reverse database migrations. Back up PostgreSQL
-  before upgrades and keep migrations compatible with the previous application.
+Open the [Releases page](https://github.com/jewdore/agentstory/releases/latest) and choose the file for your platform:
 
-Inspect status/logs (logs can contain sensitive data):
+| Platform | Recommended file | Notes |
+| --- | --- | --- |
+| Windows 10/11 x64 | `AgentStory_*_x64-setup.exe` | Recommended installer |
+| Windows 10/11 x64 | `AgentStory_*_x64_en-US.msi` | MSI package for managed installation |
+| macOS, Apple Silicon or Intel | `AgentStory_*_universal.dmg` | Universal disk image |
+| macOS, Apple Silicon or Intel | `AgentStory_universal.app.tar.gz` | Compressed application bundle |
 
-```bash
-ssh dev 'cd /opt/agentshare/current && docker compose -p agentshare --env-file .env ps'
-ssh dev 'cd /opt/agentshare/current && docker compose -p agentshare --env-file .env logs --tail=100 api web'
-```
+The installers may not yet carry a commercial code-signing certificate. If Windows SmartScreen or macOS Gatekeeper displays a warning, verify that the file came from this repository's Releases page before deciding whether to continue.
 
-Use `deploy.sh` for updates rather than bare `docker compose up`: the script
-selects the version-specific image tags. `dev` currently has an old Linux kernel;
-Node and PostgreSQL use Debian-based images because Alpine image writes failed
-with `EPERM` on that host. The script does not disable container security policies.
+### Getting started
 
-## Validation
+1. Download and install the package for your platform.
+2. Launch AgentStory; supported local agent history is discovered automatically.
+3. Organize sessions with projects, tags, favorites, and search.
+4. Create Notes from important content to build reusable knowledge.
 
-```powershell
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-go -C server test ./...
-cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib
-cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
-```
+### Privacy
 
-The PostgreSQL lifecycle test is opt-in and runs against an isolated schema:
+- Original Codex and Claude Code history files are accessed read-only.
+- Local indexes, tags, and notes remain on your device.
+- AgentStory never uploads sessions automatically.
+- A share snapshot is created only when you explicitly choose to share selected content.
 
-```powershell
-$env:TEST_DATABASE_URL='postgres://agentshare:agentshare@127.0.0.1:5432/agentshare?sslmode=disable'
-go -C server test ./internal/store
-```
+### Feedback
 
-## Safety boundaries
-
-- Original `~/.codex` and `~/.claude` files are read-only to AgentShare.
-- Local annotations live under `~/.agentshare/agentshare.db`.
-- Desktop and API secret scanners run before upload; the API repeats scanning.
-- Share URLs point to immutable cleaned snapshots, not live local sessions.
-- Private, unlisted, and public visibility are modeled from V1.
-- API responses are business data, not UI-specific card structures.
+Please open an [Issue](https://github.com/jewdore/agentstory/issues) for bug reports or feature requests. Include your operating system, AgentStory version, and reproduction steps where possible, but never attach logs containing credentials or private conversations.
