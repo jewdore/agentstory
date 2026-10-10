@@ -50,6 +50,19 @@ AgentStory 采用本地优先设计。浏览、搜索、标记和笔记默认都
 
 如果遇到问题或有功能建议，请在本仓库提交 [Issue](https://github.com/jewdore/agentstory/issues)。提交问题时，请尽量附上操作系统、AgentStory 版本和复现步骤，但不要上传包含密钥、账号或私人会话的日志。
 
+## 加入交流群
+
+欢迎加入 AgentStory 用户交流群，交流使用经验、反馈问题和了解最新进展。
+
+请添加以下任一微信，并备注 **“AgentStory 进群”**：
+
+- `huobanbengkui`
+- `jewdores`
+
+## 支持 AgentStory
+
+如果 AgentStory 对你有帮助，欢迎通过[爱发电](https://afdian.com/a/jerry)支持项目持续开发。你的支持将用于产品维护、功能改进和后续版本发布。
+
 ---
 
 <a id="english"></a>
@@ -105,3 +118,14 @@ The installers may not yet carry a commercial code-signing certificate. If Windo
 ### Feedback
 
 Please open an [Issue](https://github.com/jewdore/agentstory/issues) for bug reports or feature requests. Include your operating system, AgentStory version, and reproduction steps where possible, but never attach logs containing credentials or private conversations.
+
+### Join the community
+
+To join the AgentStory WeChat group, add either account below and include **“AgentStory 进群”** in your friend request:
+
+- `huobanbengkui`
+- `jewdores`
+
+### Support AgentStory
+
+If AgentStory is useful to you, you can support its continued development on [Afdian](https://afdian.com/a/jerry). Your support helps fund maintenance, improvements, and future releases.
